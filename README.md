@@ -21,3 +21,4 @@ __Updates:__
 
 * v0.0.2 - now produces code that includes paths derived by ProcessWire at run-time so paths will be fine on localhost and live servers, removing potential issues when pushing a site live.
 * v1.0.0 - bumped this up to a major version number since there appear to be no issues with the initial versions to speak of. Also implemented yellowled's input field suggestion (looks much better and easier to select for copy and paste purposes) and turned off autoload at ryan's suggestion.
+* v1.0.1 - now recusrively searches for files inside subfolders under the scripts and styles directories using PHP 5's built-in iterator classes

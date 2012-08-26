@@ -10,7 +10,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 			'title' => 'Minify',
 			'summary' => 'Compresses and combines javascript and CSS files for use in templates using the Minify library. Please see the license file included for licensing info.',
 			'href' => 'http://processwire.com/talk/topic/1537-minify/',
-			'version' => 100,
+			'version' => 101,
 			'permanent' => false,
 			'autoload' => false,
 			'singular' => true,
@@ -47,21 +47,23 @@ class Minify extends WireData implements Module, ConfigurableModule {
 		$templatepath = trim(wire('config')->urls->templates, '/'); // We need to trim off the startt and end slashes for the Minify URL
 		
 		$scripts = array();
-		$scriptfiles = scandir(wire('config')->paths->root . 'site/templates/scripts/');
-		foreach ($scriptfiles as $file) {
-			if (strpos($file, '.js') !== FALSE) {
-				$scripts[] = $file;
+		$iterator = new RecursiveDirectoryIterator(wire('config')->paths->root . 'site/templates/scripts/');
+		foreach (new RecursiveIteratorIterator($iterator) as $filename => $cur) {
+			$filename = str_replace('\\', '/', $filename);
+			if (strpos($filename, '.js') !== FALSE) {
+				$scripts[] = str_replace(wire('config')->paths->root . 'site/templates/scripts/', '', $filename);
+				//print_r($filename);
 			}
-		}
-		
+		}		
 		
 		$styles = array();
-		$stylefiles = scandir(wire('config')->paths->root . 'site/templates/styles/');
-		foreach ($stylefiles as $file) {
-			if (strpos($file, '.css') !== FALSE) {
-				$styles[] = $file;
+		$iterator = new RecursiveDirectoryIterator(wire('config')->paths->root . 'site/templates/styles/');
+		foreach (new RecursiveIteratorIterator($iterator) as $filename => $cur) {
+			$filename = str_replace('\\', '/', $filename);
+			if (strpos($filename, '.css') !== FALSE) {
+				$styles[] = str_replace(wire('config')->paths->root . 'site/templates/styles/', '', $filename);
 			}
-		}
+		}	
 
 		$fields = new InputfieldWrapper();
 		$modules = Wire::getFuel('modules');
