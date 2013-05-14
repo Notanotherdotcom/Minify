@@ -87,7 +87,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 			$iterator = new RecursiveDirectoryIterator($rootpath.$data['scripts_path']);
 			foreach (new RecursiveIteratorIterator($iterator) as $filename => $cur) {
 				$filename = str_replace('\\', '/', $filename);
-				if (strpos($filename, '.js') !== FALSE) {
+				if (strrpos($filename, '.js') == strlen($filename)-3) {
 					$scripts[] = str_replace($rootpath.$data['scripts_path'], '', $filename);
 					//print_r($filename);
 				}
@@ -97,7 +97,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 			$iterator = new RecursiveDirectoryIterator($rootpath.$data['styles_path']);
 			foreach (new RecursiveIteratorIterator($iterator) as $filename => $cur) {
 				$filename = str_replace('\\', '/', $filename);
-				if (strrpos($filename, '.css') !== FALSE) {
+				if (strrpos($filename, '.css') == strlen($filename)-4) {
 					$styles[] = str_replace($rootpath.$data['styles_path'], '', $filename);
 				}
 			}
