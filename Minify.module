@@ -23,7 +23,10 @@ class Minify extends WireData implements Module, ConfigurableModule {
 	 * This is based on Ryan's examples [used also in @apeisa's AdminBar, for instance]
 	 */
 	static public function getDefaultData() {
-		return array();
+		return array(
+			'scripts_path' => wire('config')->urls->templates . "scripts/",
+			'styles_path' => wire('config')->urls->templates . "styles/",
+		);
 	}
 
 	/**
@@ -45,81 +48,113 @@ class Minify extends WireData implements Module, ConfigurableModule {
 	static public function getModuleConfigInputfields(array $data) {
 
 		$templatepath = trim(wire('config')->urls->templates, '/'); // We need to trim off the startt and end slashes for the Minify URL
-		
-		$scripts = array();
-		$iterator = new RecursiveDirectoryIterator(wire('config')->paths->root . 'site/templates/scripts/');
-		foreach (new RecursiveIteratorIterator($iterator) as $filename => $cur) {
-			$filename = str_replace('\\', '/', $filename);
-			if (strpos($filename, '.js') !== FALSE) {
-				$scripts[] = str_replace(wire('config')->paths->root . 'site/templates/scripts/', '', $filename);
-				//print_r($filename);
-			}
-		}		
-		
-		$styles = array();
-		$iterator = new RecursiveDirectoryIterator(wire('config')->paths->root . 'site/templates/styles/');
-		foreach (new RecursiveIteratorIterator($iterator) as $filename => $cur) {
-			$filename = str_replace('\\', '/', $filename);
-			if (strpos($filename, '.css') !== FALSE) {
-				$styles[] = str_replace(wire('config')->paths->root . 'site/templates/styles/', '', $filename);
-			}
-		}	
+		$rootpath = wire('config')->paths->root;
 
 		$fields = new InputfieldWrapper();
 		$modules = Wire::getFuel('modules');
-		
-		$field = $modules->get("InputfieldAsmSelect");
-		$field->attr('name', 'styles');
-		foreach($styles as $style) {
-			$field->addOption($style); 
-		}
-		$field->label = __("Stylesheets available for selection");
-		$field->description = __("Select the .css files from your /site/template/styles/ folder that you wish to minify.");
-		$str = "var stylelist = '';
-		$('#' + $(this).parent().attr('id') + ' .asmListItemLabel').each(function(index) {
-			var separator = '';
-			if (stylelist != '') {
-				separator = ',';
-			}
-			stylelist = stylelist + separator + $(this).html();
-		});
-		var minString = '<strong style=\"font-weight: bold;\">" . __("Copy and paste this before your </head> tag:") . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;link href=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/styles&f=' + stylelist + '&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;\" />';
-		var minStringContainer = $(this).parent().attr('id') + 'Text';
-		if ($('#' + minStringContainer).length == 0) {
-			$(this).after('<div id=\"' + minStringContainer + '\">' + minString + '</div>');
-		} else {
-			$('#' + minStringContainer).html(minString);
-		}";		
-		$field->attr('onchange', $str); 
-		$fields->append($field);
-		
-		$field = $modules->get("InputfieldAsmSelect");
-		$field->attr('name', 'scripts');
-		foreach($scripts as $script) {
-			$field->addOption($script); 
-		}
-		$field->label = __("Scripts available for selection");
-		$scripts = implode(',', $scripts);
-		$field->description = __("Select the .js files from your /site/template/scripts/ folder that you wish to minify.");
-		$str = "var scriptlist = '';
-		$('#' + $(this).parent().attr('id') + ' .asmListItemLabel').each(function(index) {
-			var separator = '';
-			if (scriptlist != '') {
-				separator = ',';
-			}
-			scriptlist = scriptlist + separator + $(this).html();
-		});
-		var minString = '<strong style=\"font-weight: bold;\">" . __("Copy and paste this before your </head> tag:") . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;script type=&quot;text/javascript&quot; src=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/scripts&f=' + scriptlist + '&quot;&gt;&lt;/script&gt;\" /><br /><br />'
-					  + '" . htmlentities(__("Note: Ensure that if you are adding an jQuery-related scripts that you add jQuery to the top of the list before it is called by any other script.")) . "';
-		var minStringContainer = $(this).parent().attr('id') + 'Text';
-		if ($('#' + minStringContainer).length == 0) {
-			$(this).after('<div id=\"' + minStringContainer + '\">' + minString + '</div>');
-		} else {
-			$('#' + minStringContainer).html(minString);
-		}";
-		$field->attr('onchange', $str); 
-		$fields->append($field);
 
+		$default_data = self::getDefaultData();
+		$data = array_merge($default_data, $data);
+
+		$fieldset = $modules->get("InputfieldFieldset");
+		$fieldset->label = __("Configure directories");
+		$fieldset->collapsed = true;
+		if (
+			(!isset($data['scripts_path']) || !isset($data['styles_path'])) || 
+			(!is_dir($rootpath.$data['scripts_path)']) && !is_dir($rootpath.$data['styles_path']))
+		) {
+			$fieldset->collapsed = false;
+			$fieldset->description = __("Scripts and/or styles directories not configured or nonexistent. Please make sure that at least one of these points to an existing directory!");
+		}
+		
+		$field = $modules->get("InputfieldText");
+		$field->name = "scripts_path";
+		$field->label = __("Scripts directory");
+		$field->value = $data['scripts_path'];
+		$fieldset->add($field);
+		
+		$field = $modules->get("InputfieldText");
+		$field->name = "styles_path";
+		$field->label = ("Styles directory");
+		$field->value = $data['styles_path'];
+		$fieldset->add($field);
+
+		$fields->add($fieldset);
+
+		if (is_dir($rootpath.$data['scripts_path']) || is_dir($rootpath.$data['styles_path'])) {
+
+			$scripts = array();
+			$iterator = new RecursiveDirectoryIterator($rootpath.$data['scripts_path']);
+			foreach (new RecursiveIteratorIterator($iterator) as $filename => $cur) {
+				$filename = str_replace('\\', '/', $filename);
+				if (strpos($filename, '.js') !== FALSE) {
+					$scripts[] = str_replace($rootpath.$data['scripts_path'], '', $filename);
+					//print_r($filename);
+				}
+			}
+			
+			$styles = array();
+			$iterator = new RecursiveDirectoryIterator($rootpath.$data['styles_path']);
+			foreach (new RecursiveIteratorIterator($iterator) as $filename => $cur) {
+				$filename = str_replace('\\', '/', $filename);
+				if (strrpos($filename, '.css') !== FALSE) {
+					$styles[] = str_replace($rootpath.$data['styles_path'], '', $filename);
+				}
+			}
+			
+			$field = $modules->get("InputfieldAsmSelect");
+			$field->attr('name', 'styles');
+			foreach($styles as $style) {
+				$field->addOption($style); 
+			}
+			$field->label = __("Stylesheets available for selection");
+			$field->description = __("Select the .css files from your styles folder that you wish to minify.");
+			$str = "var stylelist = '';
+			$('#' + $(this).parent().attr('id') + ' .asmListItemLabel').each(function(index) {
+				var separator = '';
+				if (stylelist != '') {
+					separator = ',';
+				}
+				stylelist = stylelist + separator + $(this).html();
+			});
+			var minString = '<strong style=\"font-weight: bold;\">" . __("Copy and paste this before your </head> tag:") . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;link href=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=" . trim($data['styles_path'], '/') . "&amp;f=' + stylelist + '&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;\" />';
+			var minStringContainer = $(this).parent().attr('id') + 'Text';
+			if ($('#' + minStringContainer).length == 0) {
+				$(this).after('<div id=\"' + minStringContainer + '\">' + minString + '</div>');
+			} else {
+				$('#' + minStringContainer).html(minString);
+			}";		
+			$field->attr('onchange', $str); 
+			$fields->append($field);
+			
+			$field = $modules->get("InputfieldAsmSelect");
+			$field->attr('name', 'scripts');
+			foreach($scripts as $script) {
+				$field->addOption($script); 
+			}
+			$field->label = __("Scripts available for selection");
+			$scripts = implode(',', $scripts);
+			$field->description = __("Select the .js files from your scripts folder that you wish to minify.");
+			$str = "var scriptlist = '';
+			$('#' + $(this).parent().attr('id') + ' .asmListItemLabel').each(function(index) {
+				var separator = '';
+				if (scriptlist != '') {
+					separator = ',';
+				}
+				scriptlist = scriptlist + separator + $(this).html();
+			});
+			var minString = '<strong style=\"font-weight: bold;\">" . __("Copy and paste this before your </head> tag:") . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;script type=&quot;text/javascript&quot; src=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=" . trim($data['scripts_path'], '/') . "&amp;f=' + scriptlist + '&quot;&gt;&lt;/script&gt;\" /><br /><br />'
+						  + '" . htmlentities(__("Note: Ensure that if you are adding an jQuery-related scripts that you add jQuery to the top of the list before it is called by any other script.")) . "';
+			var minStringContainer = $(this).parent().attr('id') + 'Text';
+			if ($('#' + minStringContainer).length == 0) {
+				$(this).after('<div id=\"' + minStringContainer + '\">' + minString + '</div>');
+			} else {
+				$('#' + minStringContainer).html(minString);
+			}";
+			$field->attr('onchange', $str); 
+			$fields->append($field);
+			
+		}
 		return $fields;
 	}
 }
