@@ -73,8 +73,8 @@ class Minify extends WireData implements Module, ConfigurableModule {
 		foreach($styles as $style) {
 			$field->addOption($style); 
 		}
-		$field->label = "Stylesheets available for selection";
-		$field->description = "Select the .css files from your /site/template/styles/ folder that you wish to minify.";
+		$field->label = __("Stylesheets available for selection");
+		$field->description = __("Select the .css files from your /site/template/styles/ folder that you wish to minify.");
 		$str = "var stylelist = '';
 		$('#' + $(this).parent().attr('id') + ' .asmListItemLabel').each(function(index) {
 			var separator = '';
@@ -83,7 +83,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 			}
 			stylelist = stylelist + separator + $(this).html();
 		});
-		var minString = '<strong style=\"font-weight: bold;\">Copy and paste this before your &lt;/head&gt; tag:</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;link href=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/styles&f=' + stylelist + '&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;\" />';
+		var minString = '<strong style=\"font-weight: bold;\">" . htmlentities(__("Copy and paste this before your &lt;/head&gt; tag:")) . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;link href=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/styles&f=' + stylelist + '&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;\" />';
 		var minStringContainer = $(this).parent().attr('id') + 'Text';
 		if ($('#' + minStringContainer).length == 0) {
 			$(this).after('<div id=\"' + minStringContainer + '\">' + minString + '</div>');
@@ -98,9 +98,9 @@ class Minify extends WireData implements Module, ConfigurableModule {
 		foreach($scripts as $script) {
 			$field->addOption($script); 
 		}
-		$field->label = "Scripts available for selection";
+		$field->label = __("Scripts available for selection");
 		$scripts = implode(',', $scripts);
-		$field->description = "Select the .js files from your /site/template/scripts/ folder that you wish to minify.";
+		$field->description = __("Select the .js files from your /site/template/scripts/ folder that you wish to minify.");
 		$str = "var scriptlist = '';
 		$('#' + $(this).parent().attr('id') + ' .asmListItemLabel').each(function(index) {
 			var separator = '';
@@ -108,7 +108,9 @@ class Minify extends WireData implements Module, ConfigurableModule {
 				separator = ',';
 			}
 			scriptlist = scriptlist + separator + $(this).html();
-		});var minString = '<strong style=\"font-weight: bold;\">Copy and paste this before your &lt;/head&gt; tag:</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;script type=&quot;text/javascript&quot; src=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/scripts&f=' + scriptlist + '&quot;&gt;&lt;/script&gt;\" /><br /><br />Note: Ensure that if you are adding an jQuery-related scripts that you add jQuery to the top of the list before it is called by any other script.';
+		});
+		var minString = '<strong style=\"font-weight: bold;\">" . htmlentities(__("Copy and paste this before your &lt;/head&gt; tag:")) . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;script type=&quot;text/javascript&quot; src=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/scripts&f=' + scriptlist + '&quot;&gt;&lt;/script&gt;\" /><br /><br />'
+					  + '" . htmlentities(__("Note: Ensure that if you are adding an jQuery-related scripts that you add jQuery to the top of the list before it is called by any other script.")) . "';
 		var minStringContainer = $(this).parent().attr('id') + 'Text';
 		if ($('#' + minStringContainer).length == 0) {
 			$(this).after('<div id=\"' + minStringContainer + '\">' + minString + '</div>');
