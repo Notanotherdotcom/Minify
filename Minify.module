@@ -83,7 +83,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 			}
 			stylelist = stylelist + separator + $(this).html();
 		});
-		var minString = '<strong style=\"font-weight: bold;\">" . htmlentities(__("Copy and paste this before your &lt;/head&gt; tag:")) . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;link href=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/styles&f=' + stylelist + '&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;\" />';
+		var minString = '<strong style=\"font-weight: bold;\">" . __("Copy and paste this before your </head> tag:") . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;link href=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/styles&f=' + stylelist + '&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;\" />';
 		var minStringContainer = $(this).parent().attr('id') + 'Text';
 		if ($('#' + minStringContainer).length == 0) {
 			$(this).after('<div id=\"' + minStringContainer + '\">' + minString + '</div>');
@@ -109,7 +109,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 			}
 			scriptlist = scriptlist + separator + $(this).html();
 		});
-		var minString = '<strong style=\"font-weight: bold;\">" . htmlentities(__("Copy and paste this before your &lt;/head&gt; tag:")) . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;script type=&quot;text/javascript&quot; src=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/scripts&f=' + scriptlist + '&quot;&gt;&lt;/script&gt;\" /><br /><br />'
+		var minString = '<strong style=\"font-weight: bold;\">" . __("Copy and paste this before your </head> tag:") . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;script type=&quot;text/javascript&quot; src=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=&lt;?php echo trim(\$config->urls->templates, \'/\'); ?&gt;/scripts&f=' + scriptlist + '&quot;&gt;&lt;/script&gt;\" /><br /><br />'
 					  + '" . htmlentities(__("Note: Ensure that if you are adding an jQuery-related scripts that you add jQuery to the top of the list before it is called by any other script.")) . "';
 		var minStringContainer = $(this).parent().attr('id') + 'Text';
 		if ($('#' + minStringContainer).length == 0) {
