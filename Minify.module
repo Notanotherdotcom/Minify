@@ -47,7 +47,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 	}
 	static public function getModuleConfigInputfields(array $data) {
 
-		$templatepath = trim(wire('config')->urls->templates, '/'); // We need to trim off the startt and end slashes for the Minify URL
+		$templatepath = trim(wire('config')->urls->templates, '/'); // We need to trim off the start and end slashes for the Minify URL
 		$rootpath = wire('config')->paths->root;
 
 		$fields = new InputfieldWrapper();
@@ -55,33 +55,34 @@ class Minify extends WireData implements Module, ConfigurableModule {
 
 		$default_data = self::getDefaultData();
 		$data = array_merge($default_data, $data);
+		$scripts_path_exists = $data['scripts_path'] && is_dir($rootpath.$data['scripts_path']);
+		$styles_path_exists = $data['styles_path'] && is_dir($rootpath.$data['styles_path']);
 
+		// path configuration
 		$fieldset = $modules->get("InputfieldFieldset");
-		$fieldset->label = __("Configure directories");
-		$fieldset->collapsed = true;
-		if (
-			(!isset($data['scripts_path']) || !isset($data['styles_path'])) || 
-			(!is_dir($rootpath.$data['scripts_path)']) && !is_dir($rootpath.$data['styles_path']))
-		) {
-			$fieldset->collapsed = false;
-			$fieldset->description = __("Scripts and/or styles directories not configured or nonexistent. Please make sure that at least one of these points to an existing directory!");
-		}
-		
+		$fieldset->label = __("Directory settings");
+		if ($scripts_path_exists || $styles_path_exists) $fieldset->collapsed = true;
+
 		$field = $modules->get("InputfieldText");
 		$field->name = "scripts_path";
 		$field->label = __("Scripts directory");
 		$field->value = $data['scripts_path'];
+		$field->description = __("In order to minify script files, you need to specify path for your site scripts here.");
+		if ($scripts_path_exists) $field->collapsed = true;
 		$fieldset->add($field);
 		
 		$field = $modules->get("InputfieldText");
 		$field->name = "styles_path";
 		$field->label = ("Styles directory");
 		$field->value = $data['styles_path'];
+		$field->description = __("In order to minify style files, you need to specify path for your site styles here.");
+		if ($styles_path_exists) $field->collapsed = true;
 		$fieldset->add($field);
 
 		$fields->add($fieldset);
 
-		if (is_dir($rootpath.$data['scripts_path']) || is_dir($rootpath.$data['styles_path'])) {
+		// scripts
+		if ($scripts_path_exists) {
 
 			$scripts = array();
 			$iterator = new RecursiveDirectoryIterator($rootpath.$data['scripts_path']);
@@ -89,10 +90,41 @@ class Minify extends WireData implements Module, ConfigurableModule {
 				$filename = str_replace('\\', '/', $filename);
 				if (strrpos($filename, '.js') == strlen($filename)-3) {
 					$scripts[] = str_replace($rootpath.$data['scripts_path'], '', $filename);
-					//print_r($filename);
 				}
 			}
 			
+			$field = $modules->get("InputfieldAsmSelect");
+			$field->attr('name', 'scripts');
+			foreach($scripts as $script) {
+				$field->addOption($script); 
+			}
+			$field->label = __("Scripts available for selection");
+			$scripts = implode(',', $scripts);
+			$field->description = __("Select the .js files from your scripts folder that you wish to minify.");
+			$str = "var scriptlist = '';
+			$('#' + $(this).parent().attr('id') + ' .asmListItemLabel').each(function(index) {
+				var separator = '';
+				if (scriptlist != '') {
+					separator = ',';
+				}
+				scriptlist = scriptlist + separator + $(this).html();
+			});
+			var minString = '<strong style=\"font-weight: bold;\">" . __("Copy and paste this before your </head> tag:") . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;script type=&quot;text/javascript&quot; src=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=" . trim($data['scripts_path'], '/') . "&amp;f=' + scriptlist + '&quot;&gt;&lt;/script&gt;\" /><br /><br />'
+						  + '" . htmlentities(__("Note: Ensure that if you are adding an jQuery-related scripts that you add jQuery to the top of the list before it is called by any other script.")) . "';
+			var minStringContainer = $(this).parent().attr('id') + 'Text';
+			if ($('#' + minStringContainer).length == 0) {
+				$(this).after('<div id=\"' + minStringContainer + '\">' + minString + '</div>');
+			} else {
+				$('#' + minStringContainer).html(minString);
+			}";
+			$field->attr('onchange', $str); 
+			$fields->append($field);
+
+		}
+			
+		// styles
+		if ($styles_path_exists) {
+
 			$styles = array();
 			$iterator = new RecursiveDirectoryIterator($rootpath.$data['styles_path']);
 			foreach (new RecursiveIteratorIterator($iterator) as $filename => $cur) {
@@ -127,34 +159,9 @@ class Minify extends WireData implements Module, ConfigurableModule {
 			$field->attr('onchange', $str); 
 			$fields->append($field);
 			
-			$field = $modules->get("InputfieldAsmSelect");
-			$field->attr('name', 'scripts');
-			foreach($scripts as $script) {
-				$field->addOption($script); 
-			}
-			$field->label = __("Scripts available for selection");
-			$scripts = implode(',', $scripts);
-			$field->description = __("Select the .js files from your scripts folder that you wish to minify.");
-			$str = "var scriptlist = '';
-			$('#' + $(this).parent().attr('id') + ' .asmListItemLabel').each(function(index) {
-				var separator = '';
-				if (scriptlist != '') {
-					separator = ',';
-				}
-				scriptlist = scriptlist + separator + $(this).html();
-			});
-			var minString = '<strong style=\"font-weight: bold;\">" . __("Copy and paste this before your </head> tag:") . "</strong><br /><br /><input type=\"text\" style=\"width: 100%;\" value=\"&lt;script type=&quot;text/javascript&quot; src=&quot;&lt;?php echo \$config->urls->siteModules; ?&gt;Minify/min/b=" . trim($data['scripts_path'], '/') . "&amp;f=' + scriptlist + '&quot;&gt;&lt;/script&gt;\" /><br /><br />'
-						  + '" . htmlentities(__("Note: Ensure that if you are adding an jQuery-related scripts that you add jQuery to the top of the list before it is called by any other script.")) . "';
-			var minStringContainer = $(this).parent().attr('id') + 'Text';
-			if ($('#' + minStringContainer).length == 0) {
-				$(this).after('<div id=\"' + minStringContainer + '\">' + minString + '</div>');
-			} else {
-				$('#' + minStringContainer).html(minString);
-			}";
-			$field->attr('onchange', $str); 
-			$fields->append($field);
-			
 		}
+
 		return $fields;
+
 	}
 }
