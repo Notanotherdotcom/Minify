@@ -58,7 +58,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 		$scripts_path_exists = $data['scripts_path'] && is_dir($rootpath.$data['scripts_path']);
 		$styles_path_exists = $data['styles_path'] && is_dir($rootpath.$data['styles_path']);
 
-		// path configuration
+		// Path configuration
 		$fieldset = $modules->get("InputfieldFieldset");
 		$fieldset->label = __("Directory settings");
 		if ($scripts_path_exists || $styles_path_exists) $fieldset->collapsed = true;
@@ -67,6 +67,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 		$field->name = "scripts_path";
 		$field->label = __("Scripts directory");
 		$field->value = $data['scripts_path'];
+		$field->notes = sprintf(__("Starting from the root of your ProcessWire installation. Example: %s."), $default_data['scripts_path']);
 		$field->description = __("In order to minify script files, you need to specify path for your site scripts here.");
 		if ($scripts_path_exists) $field->collapsed = true;
 		$fieldset->add($field);
@@ -75,13 +76,14 @@ class Minify extends WireData implements Module, ConfigurableModule {
 		$field->name = "styles_path";
 		$field->label = ("Styles directory");
 		$field->value = $data['styles_path'];
+		$field->notes = sprintf(__("Starting from the root of your ProcessWire installation. Example: %s."), $default_data['styles_path']);
 		$field->description = __("In order to minify style files, you need to specify path for your site styles here.");
 		if ($styles_path_exists) $field->collapsed = true;
 		$fieldset->add($field);
 
 		$fields->add($fieldset);
 
-		// scripts
+		// Scripts
 		if ($scripts_path_exists) {
 
 			$scripts = array();
@@ -122,7 +124,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 
 		}
 			
-		// styles
+		// Styles
 		if ($styles_path_exists) {
 
 			$styles = array();
