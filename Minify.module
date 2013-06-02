@@ -10,7 +10,7 @@ class Minify extends WireData implements Module, ConfigurableModule {
 			'title' => 'Minify',
 			'summary' => 'Compresses and combines javascript and CSS files for use in templates using the Minify library. Please see the license file included for licensing info.',
 			'href' => 'http://processwire.com/talk/topic/1537-minify/',
-			'version' => 101,
+			'version' => 102,
 			'permanent' => false,
 			'autoload' => false,
 			'singular' => true,
