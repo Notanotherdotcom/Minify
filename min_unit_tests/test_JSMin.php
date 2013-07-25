@@ -1,8 +1,6 @@
 <?php
 require_once '_inc.php';
 
-require_once 'JSMin.php';
-
 function test_JSMin()
 {
     global $thisDir;
@@ -10,7 +8,7 @@ function test_JSMin()
     $src = file_get_contents($thisDir . '/_test_files/js/before.js');
     $minExpected = file_get_contents($thisDir . '/_test_files/js/before.min.js');
     $minOutput = JSMin::minify($src);
-    $passed = assertTrue($minExpected == $minOutput, 'JSMin : Overall');
+    assertTrue($minExpected == $minOutput, 'JSMin : Overall');
     if (__FILE__ === realpath($_SERVER['SCRIPT_FILENAME'])) {
         echo "\n---Output: " .countBytes($minOutput). " bytes\n\n{$minOutput}\n\n";
         echo "---Expected: " .countBytes($minExpected). " bytes\n\n{$minExpected}\n\n";
@@ -20,7 +18,17 @@ function test_JSMin()
     $src = file_get_contents($thisDir . '/_test_files/js/issue144.js');
     $minExpected = file_get_contents($thisDir . '/_test_files/js/issue144.min.js');
     $minOutput = JSMin::minify($src);
-    $passed = assertTrue($minExpected == $minOutput, 'JSMin : Handle "+ ++a" syntax (Issue 144)');
+    assertTrue($minExpected == $minOutput, 'JSMin : Handle "+ ++a" syntax (Issue 144)');
+    if (__FILE__ === realpath($_SERVER['SCRIPT_FILENAME'])) {
+        echo "\n---Output: " .countBytes($minOutput). " bytes\n\n{$minOutput}\n\n";
+        echo "---Expected: " .countBytes($minExpected). " bytes\n\n{$minExpected}\n\n";
+        echo "---Source: " .countBytes($src). " bytes\n\n{$src}\n\n\n";
+    }
+
+    $src = file_get_contents($thisDir . '/_test_files/js/issue256.js');
+    $minExpected = file_get_contents($thisDir . '/_test_files/js/issue256.min.js');
+    $minOutput = JSMin::minify($src);
+    assertTrue($minExpected == $minOutput, 'JSMin : Handle \n!function()... (Issue 256)');
     if (__FILE__ === realpath($_SERVER['SCRIPT_FILENAME'])) {
         echo "\n---Output: " .countBytes($minOutput). " bytes\n\n{$minOutput}\n\n";
         echo "---Expected: " .countBytes($minExpected). " bytes\n\n{$minExpected}\n\n";
@@ -31,7 +39,7 @@ function test_JSMin()
         $src = file_get_contents($thisDir . '/_test_files/js/issue132.js');
         $minExpected = file_get_contents($thisDir . '/_test_files/js/issue132.min.js');
         $minOutput = JSMin::minify($src);
-        $passed = assertTrue($minExpected == $minOutput, 'JSMin : mbstring.func_overload shouldn\'t cause failure (Issue 132)');
+        assertTrue($minExpected == $minOutput, 'JSMin : mbstring.func_overload shouldn\'t cause failure (Issue 132)');
         if (__FILE__ === realpath($_SERVER['SCRIPT_FILENAME'])) {
             echo "\n---Output: " .countBytes($minOutput). " bytes\n\n{$minOutput}\n\n";
             echo "---Expected: " .countBytes($minExpected). " bytes\n\n{$minExpected}\n\n";
@@ -39,10 +47,10 @@ function test_JSMin()
         }
     }
 
-    $src = file_get_contents($thisDir . '/_test_files/js/issue74.js');
-    $minExpected = file_get_contents($thisDir . '/_test_files/js/issue74.min.js');
+    $src = file_get_contents($thisDir . '/_test_files/js/regexes.js');
+    $minExpected = file_get_contents($thisDir . '/_test_files/js/regexes.min.js');
     $minOutput = JSMin::minify($src);
-    $passed = assertTrue($minExpected == $minOutput, 'JSMin : Quotes in RegExp literals (Issue 74)');
+    assertTrue($minExpected == $minOutput, 'JSMin : Identify RegExp literals');
     if (__FILE__ === realpath($_SERVER['SCRIPT_FILENAME'])) {
         echo "\n---Output: " .countBytes($minOutput). " bytes\n\n{$minOutput}\n\n";
         echo "---Expected: " .countBytes($minExpected). " bytes\n\n{$minExpected}\n\n";

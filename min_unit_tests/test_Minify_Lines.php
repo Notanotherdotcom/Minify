@@ -1,7 +1,6 @@
 <?php
 
 require_once '_inc.php';
-require_once 'Minify.php';
 
 function test_Lines()
 {
@@ -16,10 +15,7 @@ function test_Lines()
         ,'quiet' => true
         ,'encodeOutput' => false
         ,'files' => array(
-            "{$thisDir}/_test_files/minify/email.js"
-            ,"{$thisDir}/_test_files/minify/lines_bugs.js"
-            ,"{$thisDir}/_test_files/minify/QueryString.js"
-            ,"{$thisDir}/_test_files/js/before.js"
+            "{$thisDir}/_test_files/js/before.js"
         )
     ));
     

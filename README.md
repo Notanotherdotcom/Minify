@@ -1,4 +1,4 @@
-# ProcessWire2.+ Minify 1.0.2
+# ProcessWire2.+ Minify 1.0.3
 
 This module helps you combine Javascript and CSS files into one, minified file to save on unnecessary HTTP requests and to compress files anywhere up to 80% (including already minified .js files).
 
@@ -23,3 +23,4 @@ __Updates:__
 * v1.0.0 - bumped this up to a major version number since there appear to be no issues with the initial versions to speak of. Also implemented yellowled's input field suggestion (looks much better and easier to select for copy and paste purposes) and turned off autoload at ryan's suggestion.
 * v1.0.1 - now recusrively searches for files inside subfolders under the scripts and styles directories using PHP 5's built-in iterator classes
 * v1.0.2 - pull request from teppo - https://github.com/Notanotherdotcom/Minify/pull/1
+* v1.0.3 - updated Minify code to v2.1.7 which fixes a significant security flaw: https://groups.google.com/forum/#!msg/minify/cpN-ncKPFZE/kwYVpLMkfDwJ
